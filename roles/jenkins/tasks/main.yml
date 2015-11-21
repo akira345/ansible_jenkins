@@ -1,0 +1,54 @@
+---
+# Jenkins
+ - name: Javaのインストール
+   yum: name={{ item }} state=installed
+   with_items:
+      - java-1.7.0-openjdk
+
+ - name: Jenkinsリポジトリの取得
+   get_url:
+     url: http://pkg.jenkins-ci.org/redhat/jenkins.repo 
+     dest: /etc/yum.repos.d/jenkins.repo
+     
+ - name: Jenkinsリポジトリのキーをインポート
+   rpm_key:
+     key: http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+
+ - name: Jenkinsインストール
+   yum:
+     name: jenkins 
+     state: latest
+
+ - name: Jenkins設定
+   lineinfile:
+     dest: /etc/sysconfig/jenkins
+     state: present
+     backrefs: yes
+     regexp: '{{ item.regexp }}'
+     line: '{{ item.line }}'
+   with_items:
+     - regexp: '^JENKINS_AJP_PORT="8009"'
+       line: 'JENKINS_AJP_PORT="-1"'
+     - regexp: '^JENKINS_ARGS="'
+       line: 'JENKINS_ARGS="--prefix=/jenkins --httpPort=8080 --ajp13Port=-1"'
+     - regexp: '^JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true"'
+       line: 'JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Xmx400M -Xms200M -Xss256k"'
+   notify:
+     - "restart jenkins" 
+             
+ - name: create timezone file 
+   file:
+    dest: /etc/timezone
+    state: touch
+
+ - name: set timezone
+   lineinfile:
+    dest: /etc/timezone
+    line: "Asia/Tokyo"
+             
+ - name: Jenkins Start
+   service: 
+     name: jenkins 
+     state: running
+     enabled: yes 
+ 

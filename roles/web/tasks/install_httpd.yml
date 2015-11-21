@@ -1,0 +1,14 @@
+---
+# Apacheと、basic認証PW生成に必要なPythonツールをインストール
+
+- name: Apacheインストール
+  yum: name={{ item }} state=installed
+  with_items:
+   - httpd
+   - mod_ssl
+   - python-setuptools
+  notify:
+    - "start and enable apache on boot" #呼び出すハンドラの名前を設定
+# BASIC認証PW生成に必要なpasslibをインストール
+- easy_install: name=pip
+- pip: name=passlib

@@ -1,0 +1,23 @@
+NameVirtualHost *:80
+
+<VirtualHost *:80>
+	ProxyPass /jenkins http://localhost:8080/jenkins
+	ProxyPassReverse /jenkins http://localhost:8080/jenkins
+	RedirectMatch permanent ^/jenkins$ /jenkins/
+
+	ServerName {{ webserver }}
+
+	<Location />
+		Options -Indexes
+		# BASIC Auth
+		AuthType Basic
+		AuthName "Top area"
+		AuthUserFile /etc/httpd/htpasswd_jenkins
+		Require valid-user
+	</Location>
+	
+	
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" T:%T D:%D I:%I O:%O" {{ webserver }}_log
+    CustomLog /var/log/httpd/{{ webserver }}/access_log {{ webserver }}_log
+    ErrorLog  /var/log/httpd/{{ webserver }}/error_log
+</VirtualHost>

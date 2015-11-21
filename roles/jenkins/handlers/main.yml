@@ -1,0 +1,9 @@
+---
+# Jenkins用ハンドラ定義
+
+ - name: "restart apache"
+   service: name=httpd state=restarted
+ - name: "restart jenkins"
+   service: name=jenkins state=restarted
+     
+ 

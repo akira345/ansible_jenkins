@@ -1,0 +1,10 @@
+---
+# Web用ハンドラ定義
+
+ - name: "restart apache"
+   service: name=httpd state=restarted
+ - name: "start and enable apache on boot"
+   service: name=httpd state=started enabled=yes  
+ - name: "restart syslogd"
+   service: name=rsyslog state=restarted
+ 

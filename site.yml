@@ -1,0 +1,13 @@
+---
+# This playbook deploys the whole application stack in this site.  
+
+ - name: Jenkins
+   hosts: jenkins_server
+   sudo: yes
+   roles:
+     - common
+     - web
+     - jenkins
+     
+
+     

@@ -1,0 +1,5 @@
+---
+# 共通で使用する変数。{{ webserver }}というふうに使用する。
+webserver: jenkins.localdomain
+
+

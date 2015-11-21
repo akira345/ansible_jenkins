@@ -1,0 +1,96 @@
+---
+# Apacheの初期設定
+
+ - name: welcome.conf削除
+   file:
+     dest: /etc/httpd/conf.d/welcome.conf
+     state: absent    #削除
+   notify:
+      - "restart apache" #ハンドラ呼び出し。
+      
+ - name: noindex.html削除
+   file:
+     dest: /var/www/error/noindex.html
+     state: absent    #削除
+   notify:
+      - "restart apache"
+                
+ - name: "httpd.confの修正その１"
+   lineinfile:
+     dest: /etc/httpd/conf/httpd.conf
+     state: present
+     backrefs: yes
+     regexp: '{{ item.regexp }}' #regexpで置換する
+     line: '{{ item.line }}'  #ファイルに置換する行
+   with_items:
+     - regexp: '^#?\s*ServerTokens'
+       line: 'ServerTokens Prod'
+     - regexp: '^#?\s*ServerSignature'
+       line: 'ServerSignature Off'
+     - regexp: '^AddDefaultCharset UTF-8'
+       line: '# AddDefaultCharset UTF-8'
+   notify:
+     - "restart apache" 
+        
+ - name: "httpd.confの修正その２"
+   lineinfile:
+     insertafter: EOF #ファイル末尾に追記
+     backrefs: no
+     dest: /etc/httpd/conf/httpd.conf
+     line: "TraceEnable off"
+   notify:
+     - "restart apache" 
+
+ - name: "httpd.confの修正その３"
+   shell: >-
+     c='/etc/httpd/conf/httpd.conf' &&
+     k='<Directory \/>' &&
+     s='AllowOverride None' &&
+     r='AllowOverride All' &&
+     mv $c $c.backup &&
+     awk "/$k/{f=1} f==1&&/$s/{sub(/.+/,\"$r\"); f=0} 1" $c.backup > $c
+   notify:
+     - "restart apache"
+     
+ - name: "httpd.confの修正その４"
+   shell: >-
+     c='/etc/httpd/conf/httpd.conf' &&
+     k='<Directory "\/var\/www\/html">' &&
+     s='Options Indexes FollowSymLinks' &&
+     r='Options -Indexes FollowSymLinks' &&
+     mv $c $c.backup2 &&
+     awk "/$k/{f=1} f==1&&/$s/{sub(/.+/,\"$r\"); f=0} 1" $c.backup2 > $c
+   notify:
+     - "restart apache" 
+                  
+ - name: template {{ webserver }}.conf
+   template: 
+     src: jenkins.conf.j2 
+     dest: /etc/httpd/conf.d/{{ webserver }}.conf
+     mode: 0644
+     owner: root
+     group: root
+   notify: "restart apache"
+      
+ - name: template {{ webserver }} log
+   template: 
+     src: jenkins_log.conf.j2 
+     dest: /etc/logrotate.d/{{ webserver }}
+     mode: 0644
+     owner: root
+     group: root
+   notify: "restart syslogd"
+   
+ - htpasswd:
+     path: /etc/httpd/htpasswd_jenkins
+     name: jenkins_user 
+     password: testpass
+    
+ - name: Jenkinsアクセスログ用ディレクトリ作成
+   file:
+     path: /var/log/httpd/{{ webserver }}
+     state: directory
+     owner: root
+     group: root
+     mode: 0755
+     
