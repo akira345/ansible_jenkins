@@ -9,5 +9,21 @@
      - web
      - jenkins
      
+ - name: zabbix-agent
+   hosts: all
+   sudo: no
+   roles:
+     - role: dj-wasabi.zabbix-agent
+       agent_server: <Zabbix Server Address>
+       agetn_serveractive: <Zabbix Server Address>
+       zabbix_url: http://zabbix.localdomain/zabbix/
+       zabbix_api_use: true
+       zabbix_api_user: admin
+       zabbix_api_pass: zabbix
+       zabbix_create_host: present
+       zabbix_host_groups:
+         - Linux servers
+       zabbix_link_templates:
+         - Template OS Linux
 
      
