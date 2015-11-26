@@ -1,0 +1,39 @@
+---
+# These tasks install http and the php modules.
+
+# パスワードは以下のコマンドで生成
+# python -c "import crypt, getpass, pwd; print crypt.crypt('password_string','\$6\$SALTsalt\$')"
+
+ - name: user add {{ manage_user }}
+   user:
+     name: '{{ manage_user }}'
+     password: "$6$SALTsalt$qKKvjLCr9kXftd/etU0NUNMcJb6gPXrJQ5/T3WQubmhY/2QSujNCvzRZ194RrrRJ40DXvNwiwORLRw4VYJjsZ."
+     groups: wheel
+     state: present
+
+ - name: make authorized key directory
+   file:
+      path: /home/{{ manage_user }}/.ssh
+      state: directory
+      owner: '{{ manage_user }}'
+      group: '{{ manage_user }}'
+      mode: 0700
+
+ - name: add authorized key
+   copy:
+     src: ssh/{{ manage_user }}_id_rsa.pub
+     dest: /home/{{ manage_user }}/.ssh/authorized_keys
+     mode: 0600
+     owner: '{{ manage_user }}'
+     group: '{{ manage_user }}'
+
+ - name: create sudo file
+   file:
+    dest: /etc/sudoers.d/{{ manage_user }}
+    state: touch
+
+ - name: set sudo user
+   lineinfile:
+    dest: /etc/sudoers.d/{{ manage_user }}
+    line: "{{ manage_user }}        ALL=(ALL)       NOPASSWD: ALL"
+

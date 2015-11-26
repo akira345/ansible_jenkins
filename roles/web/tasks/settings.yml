@@ -29,6 +29,8 @@
        line: 'ServerSignature Off'
      - regexp: '^AddDefaultCharset UTF-8'
        line: '# AddDefaultCharset UTF-8'
+     - regexp: '^DocumentRoot "/var/www/html"'
+       line: '#DocumentRoot "/var/www/html"'
    notify:
      - "restart apache" 
         
@@ -51,17 +53,6 @@
      awk "/$k/{f=1} f==1&&/$s/{sub(/.+/,\"$r\"); f=0} 1" $c.backup > $c
    notify:
      - "restart apache"
-     
- - name: "httpd.confの修正その４"
-   shell: >-
-     c='/etc/httpd/conf/httpd.conf' &&
-     k='<Directory "\/var\/www\/html">' &&
-     s='Options Indexes FollowSymLinks' &&
-     r='Options -Indexes FollowSymLinks' &&
-     mv $c $c.backup2 &&
-     awk "/$k/{f=1} f==1&&/$s/{sub(/.+/,\"$r\"); f=0} 1" $c.backup2 > $c
-   notify:
-     - "restart apache" 
                   
  - name: template {{ webserver }}.conf
    template: 
@@ -71,6 +62,21 @@
      owner: root
      group: root
    notify: "restart apache"
+
+ - name: add ssl ca
+   copy:
+     src: ssl/{{ webserver }}.ca
+     dest: /etc/pki/tls/certs/{{ webserver }}.ca
+
+ - name: add ssl crt
+   copy:
+     src: ssl/{{ webserver }}.crt
+     dest: /etc/pki/tls/certs/{{ webserver }}.crt
+
+ - name: add ssl key
+   copy:
+     src: ssl/{{ webserver }}.key
+     dest: /etc/pki/tls/private/{{ webserver }}.key
       
  - name: template {{ webserver }} log
    template: 
@@ -83,8 +89,8 @@
    
  - htpasswd:
      path: /etc/httpd/htpasswd_jenkins
-     name: jenkins_user 
-     password: testpass
+     name: "{{ basic_auth_user }}"
+     password: "{{ basic_auth_passwd }}"
     
  - name: Jenkinsアクセスログ用ディレクトリ作成
    file:

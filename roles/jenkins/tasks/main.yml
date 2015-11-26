@@ -30,7 +30,7 @@
      - regexp: '^JENKINS_AJP_PORT="8009"'
        line: 'JENKINS_AJP_PORT="-1"'
      - regexp: '^JENKINS_ARGS="'
-       line: 'JENKINS_ARGS="--prefix=/jenkins --httpPort=8080 --ajp13Port=-1"'
+       line: 'JENKINS_ARGS="--httpPort=8080 --ajp13Port=-1"'
      - regexp: '^JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true"'
        line: 'JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Xmx400M -Xms200M -Xss256k"'
    notify:

@@ -1,5 +1,9 @@
 ---
 # 共通で使用する変数。{{ webserver }}というふうに使用する。
-webserver: jenkins.localdomain
+webserver: jenkins.example.com
 
+manage_user: webmaster
+
+basic_auth_user: jenkins_user
+basic_auth_passwd: testpass
 
